@@ -72,20 +72,6 @@ const ExampleInput = styled.div`
   margin-bottom: 0.5rem;
 `;
 
-const RemoveButton = styled.button`
-  background: #ff4757;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  cursor: pointer;
-  font-size: 0.8rem;
-  
-  &:hover {
-    background: #ff3742;
-  }
-`;
-
 const AddButton = styled.button`
   background: var(--primary-color);
   color: white;
@@ -99,18 +85,6 @@ const AddButton = styled.button`
   &:hover {
     background: #0ea5e9;
   }
-`;
-
-const ErrorMessage = styled.div`
-  color: #ff4757;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-`;
-
-const FormSuccessMessage = styled.div`
-  color: #2ed573;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
 `;
 
 const LoadingSpinner = styled.div`
@@ -257,8 +231,6 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
@@ -277,7 +249,6 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
       ...prev,
       [field]: value
     }));
-    setError('');
   };
 
   const handleExampleChange = (index: number, value: string) => {
@@ -291,35 +262,30 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
     });
   };
 
+  const addExample = () => {
+    setFormData(prev => ({
+      ...prev,
+      examples: [...prev.examples, '']
+    }));
+  };
+
   const validateForm = () => {
     if (!formData.title.trim()) {
-      setError('Term title is required');
       return false;
     }
     if (!formData.definition.trim()) {
-      setError('Definition is required');
       return false;
     }
     if (formData.examples.every(example => !example.trim())) {
-      setError('At least one usage example is required');
       return false;
     }
     return true;
-  };
-
-  const closeSuccessModal = () => {
-    setShowSuccessModal(false);
-    setSuccess('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user) {
-      setError('Please sign in to contribute terms');
-      if (onAuthClick) {
-        setTimeout(() => onAuthClick(), 1000);
-      }
       return;
     }
 
@@ -328,8 +294,6 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
     }
 
     setIsSubmitting(true);
-    setError('');
-    setSuccess('');
 
     try {
       const { error } = await supabase
@@ -348,7 +312,6 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
         throw error;
       }
 
-      setSuccess('Thank you for your contribution! Your term has been submitted for review and will be published once approved by our moderators.');
       setShowSuccessModal(true);
       setFormData({
         title: '',
@@ -363,7 +326,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
         onSubmit();
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to submit contribution. Please try again.');
+      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -372,15 +335,15 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
   return (
     <>
       {showSuccessModal && (
-        <SuccessModal onClick={closeSuccessModal}>
+        <SuccessModal onClick={() => setShowSuccessModal(false)}>
           <SuccessModalContent onClick={(e) => e.stopPropagation()}>
             <SuccessIcon>🎉</SuccessIcon>
             <SuccessTitle>Contribution Submitted!</SuccessTitle>
             <SuccessMessage>
               Thank you for helping us grow SkibidiDB! Your term has been submitted for review 
-              and will be published once approved by our moderators. You'll be notified when it goes live!
+              and will be published once approved by our moderators.
             </SuccessMessage>
-            <ModalButton onClick={closeSuccessModal}>
+            <ModalButton onClick={() => setShowSuccessModal(false)}>
               Continue Contributing
             </ModalButton>
           </SuccessModalContent>
@@ -394,8 +357,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
           <LoginPrompt>
             <LoginTitle>Sign In to Contribute</LoginTitle>
             <LoginDescription>
-              Create an account or sign in to contribute new terms to SkibidiDB. 
-              Your contributions help build the ultimate Gen Z dictionary!
+              Create an account or sign in to contribute new terms to SkibidiDB.
             </LoginDescription>
             <LoginButton onClick={onAuthClick}>
               Sign In / Sign Up
@@ -449,7 +411,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
               />
             </ExampleInput>
           ))}
-          <AddButton type="button" onClick={() => handleInputChange('examples', [...formData.examples, ''])}>
+          <AddButton type="button" onClick={addExample}>
             + Add Example
           </AddButton>
         </FormGroup>
