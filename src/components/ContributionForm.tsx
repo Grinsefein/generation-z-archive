@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Button } from './Button';
 import { supabase } from '../lib/supabase';
@@ -58,22 +58,6 @@ const TextArea = styled.textarea`
   color: var(--current-text);
   min-height: 100px;
   resize: vertical;
-  transition: border-color 0.2s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: var(--primary-color);
-  }
-`;
-
-const Select = styled.select`
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  font-size: 1rem;
-  background-color: var(--current-bg);
-  color: var(--current-text);
   transition: border-color 0.2s ease;
   
   &:focus {
@@ -266,22 +250,27 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
-    icon: '',
-    category: '',
     definition: '',
     origin: '',
     examples: [''],
     relatedTerms: ['']
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const categories = [
-    'Slang', 'Meme', 'Trend', 'Gaming', 'Social Media', 'Music', 'Fashion', 'Other'
-  ];
+  useEffect(() => {
+    const savedData = localStorage.getItem('contributionForm');
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('contributionForm', JSON.stringify(formData));
+  }, [formData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -292,55 +281,14 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
   };
 
   const handleExampleChange = (index: number, value: string) => {
-    const newExamples = [...formData.examples];
-    newExamples[index] = value;
-    setFormData(prev => ({
-      ...prev,
-      examples: newExamples
-    }));
-  };
-
-  const addExample = () => {
-    setFormData(prev => ({
-      ...prev,
-      examples: [...prev.examples, '']
-    }));
-  };
-
-  const removeExample = (index: number) => {
-    if (formData.examples.length > 1) {
-      const newExamples = formData.examples.filter((_, i) => i !== index);
-      setFormData(prev => ({
+    setFormData(prev => {
+      const updatedExamples = [...prev.examples];
+      updatedExamples[index] = value;
+      return {
         ...prev,
-        examples: newExamples
-      }));
-    }
-  };
-
-  const handleRelatedTermChange = (index: number, value: string) => {
-    const newRelatedTerms = [...formData.relatedTerms];
-    newRelatedTerms[index] = value;
-    setFormData(prev => ({
-      ...prev,
-      relatedTerms: newRelatedTerms
-    }));
-  };
-
-  const addRelatedTerm = () => {
-    setFormData(prev => ({
-      ...prev,
-      relatedTerms: [...prev.relatedTerms, '']
-    }));
-  };
-
-  const removeRelatedTerm = (index: number) => {
-    if (formData.relatedTerms.length > 1) {
-      const newRelatedTerms = formData.relatedTerms.filter((_, i) => i !== index);
-      setFormData(prev => ({
-        ...prev,
-        relatedTerms: newRelatedTerms
-      }));
-    }
+        examples: updatedExamples
+      };
+    });
   };
 
   const validateForm = () => {
@@ -350,10 +298,6 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
     }
     if (!formData.definition.trim()) {
       setError('Definition is required');
-      return false;
-    }
-    if (!formData.category) {
-      setError('Category is required');
       return false;
     }
     if (formData.examples.every(example => !example.trim())) {
@@ -370,7 +314,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       setError('Please sign in to contribute terms');
       if (onAuthClick) {
@@ -378,7 +322,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
       }
       return;
     }
-    
+
     if (!validateForm()) {
       return;
     }
@@ -392,8 +336,6 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
         .from('contributions')
         .insert({
           title: formData.title.trim(),
-          icon: formData.icon.trim() || '📝',
-          category: formData.category,
           definition: formData.definition.trim(),
           origin: formData.origin.trim(),
           examples: formData.examples.filter(example => example.trim()),
@@ -410,14 +352,13 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
       setShowSuccessModal(true);
       setFormData({
         title: '',
-        icon: '',
-        category: '',
         definition: '',
         origin: '',
         examples: [''],
         relatedTerms: ['']
       });
-      
+      localStorage.removeItem('contributionForm');
+
       if (onSubmit) {
         onSubmit();
       }
@@ -476,33 +417,6 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
         </FormGroup>
 
         <FormGroup>
-          <Label htmlFor="icon">Icon/Emoji</Label>
-          <Input
-            id="icon"
-            type="text"
-            value={formData.icon}
-            onChange={(e) => handleInputChange('icon', e.target.value)}
-            placeholder="🚽, 😎, 🧢"
-            maxLength={10}
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="category">Category *</Label>
-          <Select
-            id="category"
-            value={formData.category}
-            onChange={(e) => handleInputChange('category', e.target.value)}
-            required
-          >
-            <option value="">Select a category</option>
-            {categories.map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </Select>
-        </FormGroup>
-
-        <FormGroup>
           <Label htmlFor="definition">Definition *</Label>
           <TextArea
             id="definition"
@@ -533,42 +447,12 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
                 onChange={(e) => handleExampleChange(index, e.target.value)}
                 placeholder={`Example ${index + 1}: "Your example here..."`}
               />
-              {formData.examples.length > 1 && (
-                <RemoveButton type="button" onClick={() => removeExample(index)}>
-                  Remove
-                </RemoveButton>
-              )}
             </ExampleInput>
           ))}
-          <AddButton type="button" onClick={addExample}>
+          <AddButton type="button" onClick={() => handleInputChange('examples', [...formData.examples, ''])}>
             + Add Example
           </AddButton>
         </FormGroup>
-
-        <FormGroup>
-          <Label>Related Terms</Label>
-          {formData.relatedTerms.map((term, index) => (
-            <ExampleInput key={index}>
-              <Input
-                type="text"
-                value={term}
-                onChange={(e) => handleRelatedTermChange(index, e.target.value)}
-                placeholder="Related term..."
-              />
-              {formData.relatedTerms.length > 1 && (
-                <RemoveButton type="button" onClick={() => removeRelatedTerm(index)}>
-                  Remove
-                </RemoveButton>
-              )}
-            </ExampleInput>
-          ))}
-          <AddButton type="button" onClick={addRelatedTerm}>
-            + Add Related Term
-          </AddButton>
-        </FormGroup>
-
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        {success && <FormSuccessMessage>{success}</FormSuccessMessage>}
 
         <Button 
           type="submit" 

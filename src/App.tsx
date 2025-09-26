@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { AuthProvider } from './contexts/AuthContext';
@@ -7,11 +7,12 @@ import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 import FloatingContributeButton from './components/FloatingContributeButton';
 import AuthModal from './components/AuthModal';
-import Home from './pages/Home';
-import TermDetail from './pages/TermDetail';
-import Contribute from './pages/Contribute';
-import Moderation from './pages/Moderation';
-import NotFound from './pages/NotFound';
+
+const Home = lazy(() => import('./pages/Home'));
+const TermDetail = lazy(() => import('./pages/TermDetail'));
+const Contribute = lazy(() => import('./pages/Contribute'));
+const Moderation = lazy(() => import('./pages/Moderation'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const AppWrapper = styled.div`
   display: flex;
@@ -92,13 +93,15 @@ function App() {
           onAuthClick={openAuthModal}
         />
         <MainContent>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/term/:term" element={<TermDetail />} />
-            <Route path="/contribute" element={<Contribute onAuthClick={openAuthModal} />} />
-            <Route path="/moderation" element={<Moderation />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/term/:term" element={<TermDetail />} />
+              <Route path="/contribute" element={<Contribute onAuthClick={openAuthModal} />} />
+              <Route path="/moderation" element={<Moderation />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </MainContent>
         <Footer />
         <FloatingContributeButton />

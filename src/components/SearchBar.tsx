@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
+import { supabase } from '../lib/supabase';
 
 const SearchBarWrapper = styled.div`
   width: 100%;
@@ -132,35 +133,35 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Mock suggestions data
-  const mockSuggestions = [
-    { term: 'Skibidi', description: 'Popular meme term', icon: '🚽' },
-    { term: 'Rizz', description: 'Charisma or charm', icon: '😎' },
-    { term: 'No Cap', description: 'No lie, for real', icon: '🧢' },
-    { term: 'Bet', description: 'Agreement or confirmation', icon: '✅' },
-    { term: 'Slay', description: 'Doing something exceptionally well', icon: '💅' },
-    { term: 'Periodt', description: 'Emphatic period', icon: '💯' },
-    { term: 'Main Character', description: 'Protagonist energy', icon: '🎭' },
-    { term: 'Touch Grass', description: 'Go outside, get offline', icon: '🌱' }
-  ];
-
   useEffect(() => {
-    if (query.length > 0) {
-      const filtered = mockSuggestions.filter(item =>
-        item.term.toLowerCase().includes(query.toLowerCase()) ||
-        item.description.toLowerCase().includes(query.toLowerCase())
-      );
-      setSuggestions(filtered);
-      setShowSuggestions(true);
-      setSelectedIndex(-1);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
+    const fetchSuggestions = async () => {
+      if (query.length > 0) {
+        const { data, error } = await supabase
+          .from('terms')
+          .select('term, description, icon')
+          .ilike('term', `%${query}%`);
+
+        if (error) {
+          console.error('Error fetching suggestions:', error);
+          setSuggestions([]);
+        } else {
+          setSuggestions(data || []);
+        }
+        setShowSuggestions(true);
+        setSelectedIndex(-1);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    };
+
+    fetchSuggestions();
   }, [query]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
+    // Vorschläge anzeigen, aber keine Weiterleitung auslösen
+    setShowSuggestions(true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -195,9 +196,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const handleSuggestionClick = (term: string) => {
     setQuery(term);
     setShowSuggestions(false);
-    setSelectedIndex(-1);
     if (onSearch) {
-      onSearch(term);
+      onSearch(term); // Weiterleitung oder andere Aktionen nur hier auslösen
     }
   };
 
@@ -231,16 +231,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
         placeholder={placeholder}
       />
       <SearchIcon>🔎</SearchIcon>
-      <SuggestionsList isVisible={showSuggestions && suggestions.length > 0}>
-        {suggestions.map((suggestion, index) => (
+      <SuggestionsList isVisible={showSuggestions}>
+        {suggestions.map((item, index) => (
           <SuggestionItem
-            key={suggestion.term}
+            key={item.term}
+            onClick={() => handleSuggestionClick(item.term)}
             className={index === selectedIndex ? 'selected' : ''}
-            onClick={() => handleSuggestionClick(suggestion.term)}
           >
-            <SuggestionIcon>{suggestion.icon}</SuggestionIcon>
-            <SuggestionText>{suggestion.term}</SuggestionText>
-            <SuggestionDescription>{suggestion.description}</SuggestionDescription>
+            <SuggestionIcon>{item.icon}</SuggestionIcon>
+            <SuggestionText>{item.term}</SuggestionText>
+            <SuggestionDescription>{item.description}</SuggestionDescription>
           </SuggestionItem>
         ))}
       </SuggestionsList>

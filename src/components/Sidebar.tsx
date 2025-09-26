@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -227,7 +227,7 @@ interface SidebarProps {
   onAuthClick?: (mode?: 'login' | 'register' | 'profile') => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAuthClick }) => {
+const Sidebar: React.FC<SidebarProps> = memo(({ isOpen, onClose, onAuthClick }) => {
   const navigate = useNavigate();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
@@ -240,21 +240,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAuthClick }) => {
     { name: 'Aesthetics', icon: '🎨', items: ['Subcultures', 'Fashion', 'Visual Styles'] }
   ];
 
-  const toggleCategory = (categoryName: string) => {
+  const toggleCategory = useCallback((categoryName: string) => {
     setExpandedCategory(expandedCategory === categoryName ? null : categoryName);
-  };
+  }, [expandedCategory]);
 
-  const handleRandomTerm = () => {
+  const handleRandomTerm = useCallback(() => {
     const randomTerms = ['Skibidi', 'Rizz', 'No Cap', 'Slay', 'Periodt'];
     const randomTerm = randomTerms[Math.floor(Math.random() * randomTerms.length)];
     navigate(`/term/${encodeURIComponent(randomTerm)}`);
     onClose();
-  };
+  }, [navigate, onClose]);
 
-  const handleContribute = () => {
+  const handleContribute = useCallback(() => {
     navigate('/contribute');
     onClose();
-  };
+  }, [navigate, onClose]);
 
   return (
     <>
@@ -295,6 +295,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAuthClick }) => {
       </SidebarWrapper>
     </>
   );
-};
+});
 
 export default Sidebar;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 
 const CardWrapper = styled.div`
@@ -105,7 +105,7 @@ interface CardProps {
   onClick?: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ title, icon, category, children, onClick }) => {
+const Card: React.FC<CardProps> = memo(({ title, icon, category, children, onClick }) => {
   return (
     <CardWrapper onClick={onClick}>
       <h3>
@@ -119,6 +119,6 @@ const Card: React.FC<CardProps> = ({ title, icon, category, children, onClick })
       </CardMeta>
     </CardWrapper>
   );
-};
+});
 
 export default Card;
