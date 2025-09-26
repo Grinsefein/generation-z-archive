@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
 
 const HeaderWrapper = styled.header`
   background-color: var(--current-bg);
@@ -62,13 +63,64 @@ const DarkModeToggle = styled.button`
   }
 `;
 
+const AuthButton = styled.button`
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  }
+`;
+
+const UserAvatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
 interface HeaderProps {
   onMenuToggle: () => void;
   onThemeToggle: () => void;
   isDarkMode: boolean;
+  onAuthClick: (mode?: 'login' | 'register' | 'profile') => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuToggle, onThemeToggle, isDarkMode }) => {
+const Header: React.FC<HeaderProps> = ({ onMenuToggle, onThemeToggle, isDarkMode, onAuthClick }) => {
+  const { user } = useAuth();
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const initials = getInitials(displayName);
+
   return (
     <HeaderWrapper>
       <Logo>SkibidiDB</Logo>
@@ -76,6 +128,18 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, onThemeToggle, isDarkMode
         <DarkModeToggle onClick={onThemeToggle} title="Toggle dark mode">
           {isDarkMode ? '☀️' : '🌙'}
         </DarkModeToggle>
+        {user ? (
+          <UserAvatar 
+            onClick={() => onAuthClick('profile')} 
+            title={`${displayName} - Click to view profile`}
+          >
+            {initials}
+          </UserAvatar>
+        ) : (
+          <AuthButton onClick={() => onAuthClick('login')}>
+            Sign In
+          </AuthButton>
+        )}
         <HamburgerMenu onClick={onMenuToggle} title="Open menu">
           ☰
         </HamburgerMenu>

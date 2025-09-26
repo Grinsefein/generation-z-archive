@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
+import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
+import FloatingContributeButton from './components/FloatingContributeButton';
+import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
 import TermDetail from './pages/TermDetail';
+import Contribute from './pages/Contribute';
+import Moderation from './pages/Moderation';
 import NotFound from './pages/NotFound';
 
 const AppWrapper = styled.div`
@@ -25,6 +30,8 @@ const MainContent = styled.main`
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | 'profile'>('login');
 
   // Load theme preference from localStorage
   useEffect(() => {
@@ -61,23 +68,47 @@ function App() {
     }
   };
 
+  const openAuthModal = (mode: 'login' | 'register' | 'profile' = 'login') => {
+    setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
   return (
-    <AppWrapper>
-      <Header 
-        onMenuToggle={toggleSidebar}
-        onThemeToggle={toggleTheme}
-        isDarkMode={isDarkMode}
-      />
-      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
-      <MainContent>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/term/:term" element={<TermDetail />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </MainContent>
-      <Footer />
-    </AppWrapper>
+    <AuthProvider>
+      <AppWrapper>
+        <Header 
+          onMenuToggle={toggleSidebar}
+          onThemeToggle={toggleTheme}
+          isDarkMode={isDarkMode}
+          onAuthClick={openAuthModal}
+        />
+        <Sidebar 
+          isOpen={isSidebarOpen} 
+          onClose={closeSidebar}
+          onAuthClick={openAuthModal}
+        />
+        <MainContent>
+          <Routes>
+            <Route path="/" element={<Home onAuthClick={openAuthModal} />} />
+            <Route path="/term/:term" element={<TermDetail />} />
+            <Route path="/contribute" element={<Contribute onAuthClick={openAuthModal} />} />
+            <Route path="/moderation" element={<Moderation />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </MainContent>
+        <Footer />
+        <FloatingContributeButton onAuthClick={openAuthModal} />
+        <AuthModal 
+          isOpen={isAuthModalOpen}
+          onClose={closeAuthModal}
+          initialMode={authModalMode}
+        />
+      </AppWrapper>
+    </AuthProvider>
   );
 }
 

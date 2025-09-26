@@ -54,6 +54,49 @@ const QuickLinks = styled.div`
   }
 `;
 
+const ContributeButton = styled(Button)`
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+  
+  &:active {
+    transform: translateY(-1px) scale(1.02);
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 300px;
+  }
+`;
+
 const SectionTitle = styled.h2`
   font-family: var(--font-heading);
   font-size: 2rem;
@@ -101,7 +144,96 @@ const StatLabel = styled.div`
   opacity: 0.9;
 `;
 
-const Home: React.FC = () => {
+const ContributeSection = styled.div`
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(236, 72, 153, 0.1));
+  padding: 3rem 2rem;
+  border-radius: 16px;
+  margin: 3rem 0;
+  text-align: center;
+  border: 2px solid rgba(14, 165, 233, 0.2);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+  }
+`;
+
+const ContributeTitle = styled.h2`
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 1;
+`;
+
+const ContributeDescription = styled.p`
+  font-size: 1.1rem;
+  color: var(--current-text);
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+`;
+
+const ContributeCTA = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+`;
+
+const PrimaryContributeButton = styled(ContributeButton)`
+  font-size: 1.2rem;
+  padding: 1.2rem 2.5rem;
+  animation: pulse 2s infinite;
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); }
+    50% { box-shadow: 0 4px 25px rgba(14, 165, 233, 0.5); }
+    100% { box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); }
+  }
+`;
+
+const SecondaryButton = styled(Button)`
+  background: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  font-weight: 600;
+  
+  &:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+  }
+`;
+
+interface HomeProps {
+  onAuthClick?: () => void;
+}
+
+const Home: React.FC<HomeProps> = ({ onAuthClick }) => {
   const navigate = useNavigate();
 
   const handleSearch = (query: string) => {
@@ -123,6 +255,18 @@ const Home: React.FC = () => {
   const handleNewTerms = () => {
     // Navigate to new terms page or filter
     console.log('Show new terms');
+  };
+
+  const handleContribute = () => {
+    navigate('/contribute');
+  };
+
+  const handleLearnMore = () => {
+    // Scroll to the contribute section or show more info
+    const contributeSection = document.getElementById('contribute-section');
+    if (contributeSection) {
+      contributeSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const mockTerms = [
@@ -185,6 +329,9 @@ const Home: React.FC = () => {
         <Button onClick={handleRandomTerm}>🎲 Random Term</Button>
         <Button onClick={handlePopularTerms}>🔥 Popular Terms</Button>
         <Button onClick={handleNewTerms}>✨ New Terms</Button>
+        <ContributeButton onClick={handleContribute}>
+          ✨ Contribute a Term
+        </ContributeButton>
       </QuickLinks>
 
       <StatsSection>
@@ -216,6 +363,22 @@ const Home: React.FC = () => {
           </Card>
         ))}
       </Grid>
+
+      <ContributeSection id="contribute-section">
+        <ContributeTitle>Help Us Grow! 🌱</ContributeTitle>
+        <ContributeDescription>
+          Know a term that's missing? Share your knowledge with the community! 
+          Your contributions help make SkibidiDB the ultimate guide to Gen Z culture.
+        </ContributeDescription>
+        <ContributeCTA>
+          <PrimaryContributeButton onClick={handleContribute}>
+            🚀 Contribute Now
+          </PrimaryContributeButton>
+          <SecondaryButton onClick={handleLearnMore}>
+            Learn More
+          </SecondaryButton>
+        </ContributeCTA>
+      </ContributeSection>
     </HomeWrapper>
   );
 };

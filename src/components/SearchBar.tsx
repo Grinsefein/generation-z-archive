@@ -49,19 +49,47 @@ const SuggestionsList = styled.ul<{ isVisible: boolean }>`
 `;
 
 const SuggestionItem = styled.li`
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  position: relative;
+  border-radius: 8px;
+  margin: 0.25rem;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 2px;
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+  }
   
   &:hover {
-    background-color: rgba(14, 165, 233, 0.1);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(236, 72, 153, 0.1));
+    transform: translateX(8px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+    
+    &::before {
+      transform: scaleY(1);
+    }
   }
   
   &.selected {
-    background-color: rgba(14, 165, 233, 0.2);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(236, 72, 153, 0.2));
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.2);
+    
+    &::before {
+      transform: scaleY(1);
+    }
   }
 `;
 
