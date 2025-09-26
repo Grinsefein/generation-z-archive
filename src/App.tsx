@@ -1,35 +1,84 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import styled from 'styled-components';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import TermDetail from './pages/TermDetail';
+import NotFound from './pages/NotFound';
+
+const AppWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--current-bg);
+  color: var(--current-text);
+  transition: all 0.3s ease;
+`;
+
+const MainContent = styled.main`
+  flex: 1;
+  background-color: var(--current-bg);
+`;
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Load theme preference from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDarkMode(true);
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    
+    if (newTheme) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <AppWrapper>
+      <Header 
+        onMenuToggle={toggleSidebar}
+        onThemeToggle={toggleTheme}
+        isDarkMode={isDarkMode}
+      />
+      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+      <MainContent>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/term/:term" element={<TermDetail />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </MainContent>
+      <Footer />
+    </AppWrapper>
+  );
 }
 
-export default App
+export default App;
