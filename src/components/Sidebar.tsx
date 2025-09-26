@@ -224,9 +224,10 @@ const SpecialButton = styled.button`
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onAuthClick?: (mode?: 'login' | 'register' | 'profile') => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAuthClick }) => {
   const navigate = useNavigate();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
@@ -279,7 +280,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             ))}
             
             <NavItem>
-              <NavButton>👤 Login/Profile</NavButton>
+              <NavButton onClick={() => onAuthClick?.('profile')}>👤 Login/Profile</NavButton>
             </NavItem>
             
             <NavItem>
