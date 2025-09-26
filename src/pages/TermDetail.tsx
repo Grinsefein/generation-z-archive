@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import Card from '../components/Card';
 import { Button } from '../components/Button';
 
 const TermDetailWrapper = styled.div`

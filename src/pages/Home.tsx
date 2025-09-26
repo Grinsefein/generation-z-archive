@@ -103,10 +103,8 @@ const StatLabel = styled.div`
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
     // Navigate to search results or term detail
     navigate(`/term/${encodeURIComponent(query)}`);
   };
