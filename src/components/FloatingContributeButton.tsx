@@ -81,10 +81,9 @@ const Tooltip = styled.div<{ isVisible: boolean }>`
 
 interface FloatingContributeButtonProps {
   show?: boolean;
-  onAuthClick?: () => void;
 }
 
-const FloatingContributeButton: React.FC<FloatingContributeButtonProps> = ({ show = true, onAuthClick }) => {
+const FloatingContributeButton: React.FC<FloatingContributeButtonProps> = ({ show = true }) => {
   const navigate = useNavigate();
   const [showTooltip, setShowTooltip] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);

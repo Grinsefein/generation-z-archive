@@ -93,7 +93,7 @@ function App() {
         />
         <MainContent>
           <Routes>
-            <Route path="/" element={<Home onAuthClick={openAuthModal} />} />
+            <Route path="/" element={<Home />} />
             <Route path="/term/:term" element={<TermDetail />} />
             <Route path="/contribute" element={<Contribute onAuthClick={openAuthModal} />} />
             <Route path="/moderation" element={<Moderation />} />
@@ -101,7 +101,7 @@ function App() {
           </Routes>
         </MainContent>
         <Footer />
-        <FloatingContributeButton onAuthClick={openAuthModal} />
+        <FloatingContributeButton />
         <AuthModal 
           isOpen={isAuthModalOpen}
           onClose={closeAuthModal}

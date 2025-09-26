@@ -388,7 +388,7 @@ const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onAuthCli
     setSuccess('');
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('contributions')
         .insert({
           title: formData.title.trim(),

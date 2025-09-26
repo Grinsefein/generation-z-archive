@@ -229,11 +229,9 @@ const SecondaryButton = styled(Button)`
   }
 `;
 
-interface HomeProps {
-  onAuthClick?: () => void;
-}
+interface HomeProps {}
 
-const Home: React.FC<HomeProps> = ({ onAuthClick }) => {
+const Home: React.FC<HomeProps> = () => {
   const navigate = useNavigate();
 
   const handleSearch = (query: string) => {
