@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminContainer = styled.div`
   padding: 2rem;
@@ -12,13 +14,13 @@ const Tabs = styled.div`
   margin-bottom: 2rem;
 `;
 
-const Tab = styled.button<{ active: boolean }>`
+const Tab = styled.button<{ $active: boolean }>`
   padding: 0.5rem 1rem;
   border: none;
-  border-bottom: 2px solid ${(props) => (props.active ? 'var(--primary-color)' : 'transparent')};
+  border-bottom: 2px solid ${(props) => (props.$active ? 'var(--primary-color)' : 'transparent')};
   background: none;
   cursor: pointer;
-  font-weight: ${(props) => (props.active ? 'bold' : 'normal')};
+  font-weight: ${(props) => (props.$active ? 'bold' : 'normal')};
 `;
 
 const Table = styled.table`
@@ -67,13 +69,22 @@ interface Submission {
 interface User {
   id: string;
   email: string;
+  username: string;
   role: string;
 }
 
 const AdminPage: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'submissions' | 'users'>('submissions');
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    if (user?.role !== 'admin') {
+      navigate('/'); // Redirect non-admin users to the home page
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     if (activeTab === 'submissions') {
@@ -93,7 +104,7 @@ const AdminPage: React.FC = () => {
   };
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase.from('profiles').select('*');
+    const { data, error } = await supabase.from('profiles').select('id, email, username, role');
     if (error) {
       console.error('Error fetching users:', error);
     } else {
@@ -137,13 +148,26 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  const handleSetAdmin = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: 'admin' })
+        .eq('id', id);
+      if (error) throw error;
+      fetchUsers();
+    } catch (err) {
+      console.error('Error setting user as admin:', err);
+    }
+  };
+
   return (
     <AdminContainer>
       <Tabs>
-        <Tab active={activeTab === 'submissions'} onClick={() => setActiveTab('submissions')}>
+        <Tab $active={activeTab === 'submissions'} onClick={() => setActiveTab('submissions')}>
           Submissions
         </Tab>
-        <Tab active={activeTab === 'users'} onClick={() => setActiveTab('users')}>
+        <Tab $active={activeTab === 'users'} onClick={() => setActiveTab('users')}>
           Users
         </Tab>
       </Tabs>
@@ -181,6 +205,7 @@ const AdminPage: React.FC = () => {
           <Table>
             <thead>
               <tr>
+                <TableHeader>Username</TableHeader>
                 <TableHeader>Email</TableHeader>
                 <TableHeader>Role</TableHeader>
                 <TableHeader>Actions</TableHeader>
@@ -189,6 +214,7 @@ const AdminPage: React.FC = () => {
             <tbody>
               {users.map((user) => (
                 <TableRow key={user.id}>
+                  <TableCell>{user.username || 'N/A'}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role}</TableCell>
                   <TableCell>

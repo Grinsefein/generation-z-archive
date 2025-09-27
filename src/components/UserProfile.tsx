@@ -131,6 +131,19 @@ const EmptyState = styled.div`
   opacity: 0.7;
 `;
 
+const AdminLink = styled.a`
+  display: block;
+  margin-top: 1rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 interface UserProfileProps {
   onClose?: () => void;
 }
@@ -263,6 +276,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
           ))}
         </ContributionsList>
       )}
+
+      {user?.role === 'admin' || user?.role === 'moderator' ? (
+        <AdminLink href="/admin">Go to Managing Pages</AdminLink>
+      ) : null}
     </ProfileContainer>
   );
 };

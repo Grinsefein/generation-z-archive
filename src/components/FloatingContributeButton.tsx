@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
 
 const FloatingButton = styled.button`
   position: fixed;
@@ -46,7 +47,7 @@ const FloatingButton = styled.button`
   }
 `;
 
-const Tooltip = styled.div<{ isVisible: boolean }>`
+const Tooltip = styled.div<{ $isVisible: boolean }>`
   position: absolute;
   right: 70px;
   top: 50%;
@@ -57,8 +58,8 @@ const Tooltip = styled.div<{ isVisible: boolean }>`
   border-radius: 8px;
   font-size: 0.9rem;
   white-space: nowrap;
-  opacity: ${props => props.isVisible ? 1 : 0};
-  visibility: ${props => props.isVisible ? 'visible' : 'hidden'};
+  opacity: ${(props) => (props.$isVisible ? 1 : 0)};
+  visibility: ${(props) => (props.$isVisible ? 'visible' : 'hidden')};
   transition: all 0.3s ease;
   pointer-events: none;
   
@@ -81,10 +82,12 @@ const Tooltip = styled.div<{ isVisible: boolean }>`
 
 interface FloatingContributeButtonProps {
   show?: boolean;
+  onAuthClick?: () => void;
 }
 
-const FloatingContributeButton: React.FC<FloatingContributeButtonProps> = ({ show = true }) => {
+const FloatingContributeButton: React.FC<FloatingContributeButtonProps> = ({ show = true, onAuthClick }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [showTooltip, setShowTooltip] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
 
@@ -99,23 +102,29 @@ const FloatingContributeButton: React.FC<FloatingContributeButtonProps> = ({ sho
   }, []);
 
   const handleClick = () => {
-    navigate('/contribute');
+    if (user) {
+      navigate('/contribute');
+    } else {
+      onAuthClick?.();
+    }
   };
 
   if (!show) return null;
 
   return (
-    <FloatingButton
-      onClick={handleClick}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-      title="Contribute a new term"
-    >
-      ✨
-      <Tooltip isVisible={showTooltip}>
-        {hasScrolled ? 'Contribute a term' : 'Share your knowledge!'}
-      </Tooltip>
-    </FloatingButton>
+    <>
+      <FloatingButton
+        onClick={handleClick}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        title="Contribute a new term"
+      >
+        ✨
+        <Tooltip $isVisible={showTooltip}>
+          {hasScrolled ? 'Contribute a term' : 'Share your knowledge!'}
+        </Tooltip>
+      </FloatingButton>
+    </>
   );
 };
 

@@ -4,6 +4,7 @@ import SearchBar from '../components/SearchBar';
 import { Button } from '../components/Button';
 import Card from '../components/Card';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
 
 const HomeWrapper = styled.div`
   padding: 2rem 1rem;
@@ -229,10 +230,13 @@ const SecondaryButton = styled(Button)`
   }
 `;
 
-interface HomeProps {}
+interface HomeProps {
+  onAuthClick: () => void;
+}
 
-const Home: React.FC<HomeProps> = () => {
+const Home: React.FC<HomeProps> = ({ onAuthClick }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleSearch = (query: string) => {
     // Navigate to search results or term detail
@@ -256,7 +260,11 @@ const Home: React.FC<HomeProps> = () => {
   };
 
   const handleContribute = () => {
-    navigate('/contribute');
+    if (user) {
+      navigate('/contribute');
+    } else {
+      onAuthClick();
+    }
   };
 
   const handleLearnMore = () => {

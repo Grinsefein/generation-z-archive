@@ -8,11 +8,13 @@ import Footer from './components/Footer';
 import FloatingContributeButton from './components/FloatingContributeButton';
 import AuthModal from './components/AuthModal';
 
+
 const Home = lazy(() => import('./pages/Home'));
 const TermDetail = lazy(() => import('./pages/TermDetail'));
 const Contribute = lazy(() => import('./pages/Contribute'));
 const Moderation = lazy(() => import('./pages/Moderation'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 
 const AppWrapper = styled.div`
   display: flex;
@@ -79,39 +81,42 @@ function App() {
   };
 
   return (
-    <AuthProvider>
-      <AppWrapper>
-        <Header 
-          onMenuToggle={toggleSidebar}
-          onThemeToggle={toggleTheme}
-          isDarkMode={isDarkMode}
-          onAuthClick={openAuthModal}
-        />
-        <Sidebar 
-          isOpen={isSidebarOpen} 
-          onClose={closeSidebar}
-          onAuthClick={openAuthModal}
-        />
-        <MainContent>
-          <Suspense fallback={<div>Loading...</div>}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/term/:term" element={<TermDetail />} />
-              <Route path="/contribute" element={<Contribute onAuthClick={openAuthModal} />} />
-              <Route path="/moderation" element={<Moderation />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </MainContent>
-        <Footer />
-        <FloatingContributeButton />
-        <AuthModal 
-          isOpen={isAuthModalOpen}
-          onClose={closeAuthModal}
-          initialMode={authModalMode}
-        />
-      </AppWrapper>
-    </AuthProvider>
+    <>
+      <AuthProvider>
+        <AppWrapper>
+          <Header 
+            onMenuToggle={toggleSidebar}
+            onThemeToggle={toggleTheme}
+            isDarkMode={isDarkMode}
+            onAuthClick={openAuthModal}
+          />
+          <Sidebar 
+            isOpen={isSidebarOpen} 
+            onClose={closeSidebar}
+            onAuthClick={openAuthModal}
+          />
+          <MainContent>
+            <Suspense fallback={<div>Loading...</div>}>
+              <Routes>
+                <Route path="/" element={<Home onAuthClick={openAuthModal} />} />
+                <Route path="/term/:term" element={<TermDetail />} />
+                <Route path="/contribute" element={<Contribute onAuthClick={openAuthModal} />} />
+                <Route path="/moderation" element={<Moderation />} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </MainContent>
+          <Footer />
+          <FloatingContributeButton onAuthClick={openAuthModal} />
+          <AuthModal 
+            isOpen={isAuthModalOpen}
+            onClose={closeAuthModal}
+            initialMode={authModalMode}
+          />
+        </AppWrapper>
+      </AuthProvider>
+    </>
   );
 }
 
