@@ -33,18 +33,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      let user = session?.user ?? null;
+
+      if (user) {
+        // Fetch additional user metadata (e.g., role)
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (!error && profile) {
+          user = { ...user, role: profile.role };
+        }
+      }
+
+      setUser(user);
       setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      let user = session?.user ?? null;
+
+      if (user) {
+        // Fetch additional user metadata (e.g., role)
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (!error && profile) {
+          user = { ...user, role: profile.role };
+        }
+      }
+
+      setUser(user);
       setLoading(false);
     });
 

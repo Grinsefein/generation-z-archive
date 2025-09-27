@@ -278,7 +278,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
       )}
 
       {user?.role === 'admin' || user?.role === 'moderator' ? (
-        <AdminLink href="/admin">Go to Managing Pages</AdminLink>
+        <AdminLink href="/admin">Go to Admin Page</AdminLink>
       ) : null}
     </ProfileContainer>
   );

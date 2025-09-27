@@ -17,12 +17,14 @@ const HeaderWrapper = styled.header`
   transition: all 0.3s ease;
 `;
 
-const Logo = styled.h1`
+const Logo = styled.a`
   font-family: var(--font-heading);
   font-size: 1.75rem;
   margin: 0;
   color: var(--primary-color);
   font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
 `;
 
 const HeaderControls = styled.div`
@@ -123,7 +125,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, onThemeToggle, isDarkMode
 
   return (
     <HeaderWrapper>
-      <Logo>SkibidiDB</Logo>
+      <Logo href="/">SkibidiDB</Logo>
       <HeaderControls>
         <DarkModeToggle onClick={onThemeToggle} title="Toggle dark mode">
           {isDarkMode ? '☀️' : '🌙'}
