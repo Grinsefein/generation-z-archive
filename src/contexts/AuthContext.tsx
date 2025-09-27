@@ -57,25 +57,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      let user = session?.user ?? null;
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        console.warn('User signed out. Clearing session.');
+        setUser(null);
+        setSession(null);
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        console.info('Session updated. Fetching user metadata.');
+        setSession(session);
+        let user = session?.user ?? null;
 
-      if (user) {
-        // Fetch additional user metadata (e.g., role)
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+        if (user) {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-        if (!error && profile) {
-          user = { ...user, role: profile.role };
+          if (!error && profile) {
+            user = { ...user, role: profile.role };
+          }
         }
-      }
 
-      setUser(user);
-      setLoading(false);
+        setUser(user);
+      }
     });
 
     return () => subscription.unsubscribe();

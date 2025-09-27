@@ -137,7 +137,8 @@ const AdminPage: React.FC = () => {
 
   useEffect(() => {
     if (user && user.role !== 'admin') {
-      navigate('/'); // Redirect non-admin users to the home page
+      console.error('Access denied: User is not an admin');
+      navigate('/not-authorized'); // Redirect to a not-authorized page instead of 404
     }
   }, [user, navigate]);
 

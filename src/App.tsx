@@ -15,6 +15,7 @@ const Contribute = lazy(() => import('./pages/Contribute'));
 const Moderation = lazy(() => import('./pages/Moderation'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const NotAuthorized = lazy(() => import('./pages/NotAuthorized'));
 
 const AppWrapper = styled.div`
   display: flex;
@@ -103,6 +104,7 @@ function App() {
                 <Route path="/contribute" element={<Contribute onAuthClick={openAuthModal} />} />
                 <Route path="/moderation" element={<Moderation />} />
                 <Route path="/admin" element={<AdminPage />} />
+                <Route path="/not-authorized" element={<NotAuthorized />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
